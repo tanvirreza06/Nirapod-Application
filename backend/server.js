@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 const authRoutes = require('./routes/auth');
+const requireAuth = require('./middleware/auth');
 
 const app = express();
 
@@ -21,6 +22,14 @@ app.get('/api/db-test', async (req, res) => {
   } catch (err) {
     res.status(500).json({ db: 'failed', error: err.message });
   }
+});
+
+app.get('/api/me', requireAuth, async (req, res) => {
+  const [rows] = await db.query(
+    'SELECT id, name, email FROM users WHERE id = ?',
+    [req.userId]
+  );
+  res.json(rows[0]);
 });
 
 const PORT = process.env.PORT || 5000;
