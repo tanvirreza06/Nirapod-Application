@@ -4,12 +4,14 @@ const cors = require('cors');
 const db = require('./db');
 const authRoutes = require('./routes/auth');
 const requireAuth = require('./middleware/auth');
+const contactRoutes = require('./routes/contacts');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
+app.use('/api/contacts', contactRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
