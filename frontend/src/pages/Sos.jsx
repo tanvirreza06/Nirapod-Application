@@ -1,9 +1,42 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function Sos() {
   const [eventId, setEventId] = useState(null)
   const [trackLink, setTrackLink] = useState('')
   const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    if (!eventId) return
+
+    const token = localStorage.getItem('token')
+
+    function sendLocation() {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            await fetch(`http://localhost:5000/api/sos/${eventId}/location`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude
+              })
+            })
+          } catch (err) {
+            setMessage('Cannot reach server')
+          }
+        },
+        () => setMessage('Please allow location access')
+      )
+    }
+
+    sendLocation()
+    const timer = setInterval(sendLocation, 5000)
+    return () => clearInterval(timer)
+  }, [eventId])
 
   async function startSos() {
     setMessage('')
