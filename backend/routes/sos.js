@@ -1,5 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const db = require('../db');
 const requireAuth = require('../middleware/auth');
 
@@ -69,4 +70,41 @@ router.post('/:id/location', async (req, res) => {
   }
 });
 
+router.post('/:id/stop', async (req, res) => {
+  try {
+    const { pin } = req.body;
+
+    if (!pin) {
+      return res.status(400).json({ error: 'PIN is required' });
+    }
+
+    const [users] = await db.query(
+      'SELECT pin_hash FROM users WHERE id = ?',
+      [req.userId]
+    );
+
+    if (users.length === 0 || !users[0].pin_hash) {
+      return res.status(400).json({ error: 'No PIN set for this account' });
+    }
+
+    const match = await bcrypt.compare(String(pin), users[0].pin_hash);
+    if (!match) {
+      return res.status(401).json({ error: 'Wrong PIN' });
+    }
+
+    const [result] = await db.query(
+      "UPDATE sos_events SET status = 'ended', ended_at = NOW() WHERE id = ? AND user_id = ? AND status = 'active'",
+      [req.params.id, req.userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Active SOS not found' });
+    }
+
+    res.json({ message: 'SOS ended. Stay safe!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 module.exports = router;
