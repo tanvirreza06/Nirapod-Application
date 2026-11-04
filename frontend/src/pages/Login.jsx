@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 function Login() {
-  const navigate = useNavigate()  
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -40,18 +40,21 @@ function Login() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 12, padding: 8 }}
+          style={{ display: 'block', width: '100%', marginBottom: 12, padding: 8, boxSizing: 'border-box' }}
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ display: 'block', width: '100%', marginBottom: 12, padding: 8 }}
+          style={{ display: 'block', width: '100%', marginBottom: 12, padding: 8, boxSizing: 'border-box' }}
         />
         <button type="submit" style={{ padding: '8px 16px' }}>Login</button>
       </form>
       <p>{message}</p>
+      <p>
+        New here? <Link to="/signup">Create an account</Link>
+      </p>
     </div>
   )
 }
