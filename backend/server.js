@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const requireAuth = require('./middleware/auth');
 const contactRoutes = require('./routes/contacts');
 const sosRoutes = require('./routes/sos');
+const trackRoutes = require('./routes/track');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/sos', sosRoutes);
+app.use('/api/track', trackRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
