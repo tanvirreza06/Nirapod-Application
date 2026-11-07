@@ -7,6 +7,8 @@ const requireAuth = require('./middleware/auth');
 const contactRoutes = require('./routes/contacts');
 const sosRoutes = require('./routes/sos');
 const trackRoutes = require('./routes/track');
+const timerRoutes = require('./routes/timer');
+const { startTimerChecker } = require('./timerChecker');
 
 const app = express();
 
@@ -16,6 +18,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/sos', sosRoutes);
 app.use('/api/track', trackRoutes);
+app.use('/api/timer', timerRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -41,4 +44,5 @@ app.get('/api/me', requireAuth, async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startTimerChecker();
 });
