@@ -12,7 +12,15 @@ function Sos() {
   const [pin, setPin] = useState('')
   const [shakeOn, setShakeOn] = useState(false)
   const [countdown, setCountdown] = useState(null)
+  const [cancelPin, setCancelPin] = useState('')
+  const [cancelMessage, setCancelMessage] = useState('')
   const shakeTimes = useRef([])
+
+  function beginCountdown() {
+    setCancelPin('')
+    setCancelMessage('')
+    setCountdown(COUNTDOWN_SECONDS)
+  }
 
   useEffect(() => {
     if (!eventId) return
@@ -68,7 +76,7 @@ function Sos() {
 
       if (shakeTimes.current.length >= SHAKES_NEEDED) {
         shakeTimes.current = []
-        setCountdown(COUNTDOWN_SECONDS)
+        beginCountdown()
       }
     }
 
@@ -106,6 +114,40 @@ function Sos() {
 
     setShakeOn(true)
     setMessage('Shake protection is on. Keep this screen open.')
+  }
+
+  async function cancelWithPin() {
+    if (!cancelPin) {
+      setCancelMessage('Enter your PIN')
+      return
+    }
+
+    const token = localStorage.getItem('token')
+
+    try {
+      const res = await fetch('http://localhost:5000/api/sos/verify-pin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ pin: cancelPin })
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setCancelMessage(data.error || 'Wrong PIN')
+        setCancelPin('')
+        return
+      }
+
+      setCountdown(null)
+      setCancelPin('')
+      setCancelMessage('')
+      setMessage('Alert cancelled')
+    } catch (err) {
+      setCancelMessage('Cannot reach server')
+    }
   }
 
   async function startSos() {
@@ -171,12 +213,18 @@ function Sos() {
         <h2>Shake detected</h2>
         <p>SOS will start in</p>
         <div style={{ fontSize: 72, fontWeight: 'bold', color: '#d62828' }}>{countdown}</div>
-        <button
-          onClick={() => setCountdown(null)}
-          style={{ padding: '12px 24px', fontSize: 18, marginTop: 16 }}
-        >
-          Cancel
+        <input
+          type="password"
+          inputMode="numeric"
+          placeholder="Enter PIN to cancel"
+          value={cancelPin}
+          onChange={(e) => setCancelPin(e.target.value)}
+          style={{ display: 'block', width: '100%', margin: '16px 0 12px', padding: 8, boxSizing: 'border-box' }}
+        />
+        <button onClick={cancelWithPin} style={{ padding: '12px 24px', fontSize: 18 }}>
+          Cancel with PIN
         </button>
+        <p>{cancelMessage}</p>
       </div>
     )
   }
@@ -213,9 +261,7 @@ function Sos() {
           </div>
 
           <div style={{ marginTop: 12 }}>
-            <button onClick={() => setCountdown(COUNTDOWN_SECONDS)}>
-              Test shake (for laptop testing)
-            </button>
+            <button onClick={beginCountdown}>Test shake (for laptop testing)</button>
           </div>
         </div>
       ) : (

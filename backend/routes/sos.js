@@ -130,4 +130,33 @@ router.post('/:id/stop', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+router.post('/verify-pin', async (req, res) => {
+  try {
+    const { pin } = req.body;
+
+    if (!pin) {
+      return res.status(400).json({ error: 'PIN is required' });
+    }
+
+    const [users] = await db.query(
+      'SELECT pin_hash FROM users WHERE id = ?',
+      [req.userId]
+    );
+
+    if (users.length === 0 || !users[0].pin_hash) {
+      return res.status(400).json({ error: 'No PIN set for this account' });
+    }
+
+    const match = await bcrypt.compare(String(pin), users[0].pin_hash);
+    if (!match) {
+      return res.status(401).json({ error: 'Wrong PIN' });
+    }
+
+    res.json({ message: 'PIN correct' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
