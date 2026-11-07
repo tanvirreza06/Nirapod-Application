@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+const SHAKE_LIMIT = 25
+const SHAKES_NEEDED = 3
+const SHAKE_WINDOW_MS = 1500
+const COUNTDOWN_SECONDS = 10
 
 function Sos() {
   const [eventId, setEventId] = useState(null)
   const [trackLink, setTrackLink] = useState('')
   const [message, setMessage] = useState('')
   const [pin, setPin] = useState('')
+  const [shakeOn, setShakeOn] = useState(false)
+  const [countdown, setCountdown] = useState(null)
+  const shakeTimes = useRef([])
 
   useEffect(() => {
     if (!eventId) return
@@ -38,6 +46,67 @@ function Sos() {
     const timer = setInterval(sendLocation, 5000)
     return () => clearInterval(timer)
   }, [eventId])
+
+  useEffect(() => {
+    if (!shakeOn || eventId || countdown !== null) return
+
+    function onMotion(e) {
+      const a = e.accelerationIncludingGravity
+      if (!a) return
+
+      const force = Math.sqrt((a.x || 0) ** 2 + (a.y || 0) ** 2 + (a.z || 0) ** 2)
+      if (force < SHAKE_LIMIT) return
+
+      const now = Date.now()
+      const last = shakeTimes.current[shakeTimes.current.length - 1]
+      if (last && now - last < 150) return
+
+      shakeTimes.current = [
+        ...shakeTimes.current.filter((t) => now - t < SHAKE_WINDOW_MS),
+        now
+      ]
+
+      if (shakeTimes.current.length >= SHAKES_NEEDED) {
+        shakeTimes.current = []
+        setCountdown(COUNTDOWN_SECONDS)
+      }
+    }
+
+    window.addEventListener('devicemotion', onMotion)
+    return () => window.removeEventListener('devicemotion', onMotion)
+  }, [shakeOn, eventId, countdown])
+
+  useEffect(() => {
+    if (countdown === null) return
+
+    if (countdown === 0) {
+      setCountdown(null)
+      startSos()
+      return
+    }
+
+    if (navigator.vibrate) navigator.vibrate(200)
+    const t = setTimeout(() => setCountdown(countdown - 1), 1000)
+    return () => clearTimeout(t)
+  }, [countdown])
+
+  async function enableShake() {
+    if (typeof DeviceMotionEvent === 'undefined') {
+      setMessage('This device has no motion sensor')
+      return
+    }
+
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      const result = await DeviceMotionEvent.requestPermission()
+      if (result !== 'granted') {
+        setMessage('Motion permission denied')
+        return
+      }
+    }
+
+    setShakeOn(true)
+    setMessage('Shake protection is on. Keep this screen open.')
+  }
 
   async function startSos() {
     setMessage('')
@@ -96,27 +165,59 @@ function Sos() {
     }
   }
 
+  if (countdown !== null) {
+    return (
+      <div style={{ maxWidth: 320, margin: '60px auto', padding: 16, textAlign: 'center' }}>
+        <h2>Shake detected</h2>
+        <p>SOS will start in</p>
+        <div style={{ fontSize: 72, fontWeight: 'bold', color: '#d62828' }}>{countdown}</div>
+        <button
+          onClick={() => setCountdown(null)}
+          style={{ padding: '12px 24px', fontSize: 18, marginTop: 16 }}
+        >
+          Cancel
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div style={{ maxWidth: 320, margin: '60px auto', padding: 16, textAlign: 'center' }}>
       <h2>Nirapod</h2>
 
       {!eventId ? (
-        <button
-          onClick={startSos}
-          style={{
-            width: 180,
-            height: 180,
-            borderRadius: '50%',
-            border: 'none',
-            background: '#d62828',
-            color: '#ffffff',
-            fontSize: 36,
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
-          SOS
-        </button>
+        <div>
+          <button
+            onClick={startSos}
+            style={{
+              width: 180,
+              height: 180,
+              borderRadius: '50%',
+              border: 'none',
+              background: '#d62828',
+              color: '#ffffff',
+              fontSize: 36,
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            SOS
+          </button>
+
+          <div style={{ marginTop: 24 }}>
+            {shakeOn ? (
+              <button onClick={() => setShakeOn(false)}>Turn off shake protection</button>
+            ) : (
+              <button onClick={enableShake}>Turn on shake protection</button>
+            )}
+          </div>
+
+          <div style={{ marginTop: 12 }}>
+            <button onClick={() => setCountdown(COUNTDOWN_SECONDS)}>
+              Test shake (for laptop testing)
+            </button>
+          </div>
+        </div>
       ) : (
         <div>
           <p>Tracking link for your contacts:</p>

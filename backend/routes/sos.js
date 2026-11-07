@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { sendTelegram } = require('../telegram');
+const { sendEmail } = require('../email');
 const db = require('../db');
 const requireAuth = require('../middleware/auth');
 
@@ -31,19 +32,23 @@ router.post('/start', async (req, res) => {
       [req.userId, shareToken]
     );
 
-        const [users] = await db.query('SELECT name FROM users WHERE id = ?', [req.userId]);
+           const [users] = await db.query('SELECT name FROM users WHERE id = ?', [req.userId]);
 
     const [contacts] = await db.query(
-      "SELECT telegram_id FROM contacts WHERE user_id = ? AND telegram_id IS NOT NULL AND telegram_id <> ''",
+      'SELECT telegram_id, email FROM contacts WHERE user_id = ?',
       [req.userId]
     );
 
     const link = `http://localhost:5173/track/${shareToken}`;
     const text = `${users[0].name} needs help! Track her live location: ${link}`;
 
-    const results = await Promise.all(
-      contacts.map((c) => sendTelegram(c.telegram_id, text))
-    );
+    const jobs = [];
+    contacts.forEach((c) => {
+      if (c.telegram_id) jobs.push(sendTelegram(c.telegram_id, text));
+      if (c.email) jobs.push(sendEmail(c.email, 'SOS alert from Nirapod', text));
+    });
+
+    const results = await Promise.all(jobs);
     const alerted = results.filter((r) => r.ok).length;
 
     res.status(201).json({
