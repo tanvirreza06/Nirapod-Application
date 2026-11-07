@@ -1,6 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const { sendTelegram } = require('../telegram');
 const db = require('../db');
 const requireAuth = require('../middleware/auth');
 
@@ -30,11 +31,28 @@ router.post('/start', async (req, res) => {
       [req.userId, shareToken]
     );
 
+        const [users] = await db.query('SELECT name FROM users WHERE id = ?', [req.userId]);
+
+    const [contacts] = await db.query(
+      "SELECT telegram_id FROM contacts WHERE user_id = ? AND telegram_id IS NOT NULL AND telegram_id <> ''",
+      [req.userId]
+    );
+
+    const link = `http://localhost:5173/track/${shareToken}`;
+    const text = `${users[0].name} needs help! Track her live location: ${link}`;
+
+    const results = await Promise.all(
+      contacts.map((c) => sendTelegram(c.telegram_id, text))
+    );
+    const alerted = results.filter((r) => r.ok).length;
+
     res.status(201).json({
       message: 'SOS started',
       eventId: result.insertId,
-      shareToken
+      shareToken,
+      alerted
     });
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
