@@ -8,6 +8,8 @@ const contactRoutes = require('./routes/contacts');
 const sosRoutes = require('./routes/sos');
 const trackRoutes = require('./routes/track');
 const timerRoutes = require('./routes/timer');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 
 const app = express();
 
@@ -18,6 +20,8 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/sos', sosRoutes);
 app.use('/api/track', trackRoutes);
 app.use('/api/timer', timerRoutes);
+app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
