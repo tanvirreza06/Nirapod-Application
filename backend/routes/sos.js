@@ -86,6 +86,11 @@ router.post('/:id/location', async (req, res) => {
       [req.params.id, lat, lng]
     );
 
+    await db.query(
+      'UPDATE sos_events SET signal_lost_alerted = 0 WHERE id = ?',
+      [req.params.id]
+    );
+
     res.status(201).json({ message: 'Location saved' });
   } catch (err) {
     console.error(err);

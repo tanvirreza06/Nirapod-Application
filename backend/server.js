@@ -9,6 +9,7 @@ const sosRoutes = require('./routes/sos');
 const trackRoutes = require('./routes/track');
 const timerRoutes = require('./routes/timer');
 const { startTimerChecker } = require('./timerChecker');
+const { startHeartbeatChecker } = require('./heartbeatChecker');
 
 const app = express();
 
@@ -45,4 +46,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   startTimerChecker();
+  startHeartbeatChecker();
 });
