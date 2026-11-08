@@ -26,6 +26,7 @@ function Navbar() {
     >
       <strong style={{ marginRight: 24 }}>Nirapod</strong>
       <Link to="/sos" style={linkStyle}>SOS</Link>
+      <Link to="/timer" style={linkStyle}>Timer</Link>
       <Link to="/contacts" style={linkStyle}>Contacts</Link>
       <button onClick={logout} style={{ marginLeft: 'auto' }}>Logout</button>
     </nav>

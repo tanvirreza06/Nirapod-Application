@@ -4,6 +4,7 @@ import Signup from './pages/Signup'
 import Sos from './pages/Sos'
 import Track from './pages/Track'
 import Contacts from './pages/Contacts'
+import Timer from './pages/Timer'
 import Navbar from './components/Navbar'
 
 function ProtectedLayout() {
@@ -31,6 +32,7 @@ function App() {
 
         <Route element={<ProtectedLayout />}>
           <Route path="/sos" element={<Sos />} />
+          <Route path="/timer" element={<Timer />} />
           <Route path="/contacts" element={<Contacts />} />
         </Route>
 
