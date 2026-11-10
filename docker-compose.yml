@@ -27,6 +27,8 @@ services:
 
   frontend:
     build: ./frontend
+      environment:
+      VITE_PROXY_TARGET: http://backend:5000
     ports:
       - "5173:5173"
     depends_on:

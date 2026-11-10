@@ -31,7 +31,7 @@ function Sos() {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           try {
-            await fetch(`http://localhost:5000/api/sos/${eventId}/location`, {
+            await fetch(`/api/sos/${eventId}/location`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ function Sos() {
     const token = localStorage.getItem('token')
 
     try {
-      const res = await fetch('http://localhost:5000/api/sos/verify-pin', {
+      const res = await fetch('/api/sos/verify-pin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ function Sos() {
     const token = localStorage.getItem('token')
 
     try {
-      const res = await fetch('http://localhost:5000/api/sos/start', {
+      const res = await fetch('/api/sos/start', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -167,7 +167,7 @@ function Sos() {
       }
 
       setEventId(data.eventId)
-      setTrackLink(`http://localhost:5173/track/${data.shareToken}`)
+      setTrackLink(`${window.location.origin}/track/${data.shareToken}`)
       setMessage(data.message)
     } catch (err) {
       setMessage('Cannot reach server')
@@ -183,7 +183,7 @@ function Sos() {
     const token = localStorage.getItem('token')
 
     try {
-      const res = await fetch(`http://localhost:5000/api/sos/${eventId}/stop`, {
+      const res = await fetch(`/api/sos/${eventId}/stop`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
