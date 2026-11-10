@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const API = 'http://localhost:5000/api/timer'
+const API = '/api/timer'
 
 function formatTime(s) {
   const h = Math.floor(s / 3600)

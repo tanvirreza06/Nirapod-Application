@@ -19,7 +19,7 @@ function Track() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`http://localhost:5000/api/track/${token}`)
+        const res = await fetch(`/api/track/${token}`)
         const json = await res.json()
 
         if (!res.ok) {

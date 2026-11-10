@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const db = require('./db');
 const { sendTelegram } = require('./telegram');
 const { sendEmail } = require('./email');
+const { frontendUrl } = require('./config');
 
 async function startSosForUser(userId, options = {}) {
   const { reason, lat, lng } = options;
@@ -41,7 +42,7 @@ async function startSosForUser(userId, options = {}) {
     [userId]
   );
 
-  const link = `http://localhost:5173/track/${shareToken}`;
+  const link = `${frontendUrl}/track/${shareToken}`;
   const text = `${users[0].name} ${reason} Track here: ${link}`;
 
   const jobs = [];

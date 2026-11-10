@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { sendTelegram } = require('../telegram');
 const { sendEmail } = require('../email');
+const { frontendUrl } = require('../config');
 const db = require('../db');
 const requireAuth = require('../middleware/auth');
 
@@ -39,7 +40,7 @@ router.post('/start', async (req, res) => {
       [req.userId]
     );
 
-    const link = `http://localhost:5173/track/${shareToken}`;
+    const link = `${frontendUrl}/track/${shareToken}`;
     const text = `${users[0].name} needs help! Track her live location: ${link}`;
 
     const jobs = [];
