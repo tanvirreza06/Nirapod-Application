@@ -1,6 +1,7 @@
 const db = require('./db');
 const { sendTelegram } = require('./telegram');
 const { sendEmail } = require('./email');
+const { frontendUrl } = require('./config');
 
 const SILENCE_SECONDS = 60;
 
@@ -33,7 +34,7 @@ async function checkHeartbeats() {
         [ev.user_id]
       );
 
-      const link = `http://localhost:5173/track/${ev.share_token}`;
+      const link = `${frontendUrl}/track/${ev.share_token}`;
       const text = `Signal lost! ${ev.name}'s phone stopped sending location. It may be switched off or have no internet. Her last known location is on the map: ${link}`;
 
       const jobs = [];
