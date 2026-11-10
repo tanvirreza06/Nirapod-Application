@@ -294,6 +294,21 @@ function Sos() {
       )}
 
       <p>{message}</p>
+            <a
+        href="tel:999"
+        style={{
+          display: 'inline-block',
+          marginTop: 16,
+          padding: '10px 20px',
+          border: '2px solid #d62828',
+          borderRadius: 8,
+          color: '#d62828',
+          textDecoration: 'none',
+          fontWeight: 'bold'
+        }}
+      >
+        Call 999
+      </a>
     </div>
   )
 }
