@@ -74,7 +74,8 @@ router.post('/start', async (req, res) => {
 
 router.post('/:id/location', async (req, res) => {
   try {
-    const { lat, lng } = req.body;
+    const lat = req.body.lat ?? req.body.latitude;
+    const lng = req.body.lng ?? req.body.longitude;
 
     if (typeof lat !== 'number' || typeof lng !== 'number') {
       return res.status(400).json({ error: 'lat and lng must be numbers' });

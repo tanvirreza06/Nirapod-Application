@@ -5,5 +5,8 @@
   "server": {
     "url": "https://nirapod-application.vercel.app",
     "androidScheme": "https"
+  },
+  "android": {
+    "useLegacyBridge": true
   }
 }
