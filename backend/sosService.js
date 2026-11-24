@@ -6,6 +6,10 @@ const { frontendUrl } = require('./config');
 
 async function startSosForUser(userId, options = {}) {
   const { reason, lat, lng } = options;
+    await db.query(
+    "UPDATE sos_events SET status = 'ended', ended_at = NOW() WHERE user_id = ? AND status = 'active' AND expires_at <= NOW()",
+    [userId]
+  );
 
   const [active] = await db.query(
     "SELECT id, share_token FROM sos_events WHERE user_id = ? AND status = 'active'",

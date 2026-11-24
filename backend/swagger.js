@@ -131,6 +131,17 @@ const swaggerSpec = {
         }
       }
     },
+        '/api/sos/active': {
+      get: {
+        tags: ['SOS'],
+        summary: 'Get your SOS that is still active, if any',
+        security: bearer,
+        responses: {
+          200: { description: 'active true with eventId and shareToken, or active false' }
+        }
+      }
+    },
+    
     '/api/sos/{id}/stop': {
       post: {
         tags: ['SOS'],
