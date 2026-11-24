@@ -98,6 +98,29 @@ function Sos() {
     return () => clearTimeout(t)
   }, [countdown])
 
+    useEffect(() => {
+    async function restoreActiveSos() {
+      const token = localStorage.getItem('token')
+
+      try {
+        const res = await fetch('/api/sos/active', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const data = await res.json()
+
+        if (res.ok && data.active) {
+          setEventId(data.eventId)
+          setTrackLink(`${window.location.origin}/track/${data.shareToken}`)
+          setMessage('An SOS is still active. Enter your PIN to end it.')
+        }
+      } catch {
+        setMessage('Cannot reach server')
+      }
+    }
+
+    restoreActiveSos()
+  }, [])
+  
   async function enableShake() {
     if (typeof DeviceMotionEvent === 'undefined') {
       setMessage('This device has no motion sensor')

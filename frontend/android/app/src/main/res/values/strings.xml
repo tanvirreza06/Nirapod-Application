@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nirapod</string>
+    <string name="title_activity_main">Nirapod</string>
+    <string name="package_name">com.nirapod.app</string>
+    <string name="custom_url_scheme">com.nirapod.app</string>
+</resources>

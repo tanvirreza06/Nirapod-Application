@@ -10,9 +10,16 @@ const requireAuth = require('../middleware/auth');
 const router = express.Router();
 
 router.use(requireAuth);
+async function endExpiredSos(userId) {
+  await db.query(
+    "UPDATE sos_events SET status = 'ended', ended_at = NOW() WHERE user_id = ? AND status = 'active' AND expires_at <= NOW()",
+    [userId]
+  );
+}
 
 router.post('/start', async (req, res) => {
   try {
+    await endExpiredSos(req.userId);
     const [active] = await db.query(
       "SELECT id, share_token FROM sos_events WHERE user_id = ? AND status = 'active'",
       [req.userId]
@@ -165,4 +172,27 @@ router.post('/verify-pin', async (req, res) => {
   }
 });
 
+router.get('/active', async (req, res) => {
+  try {
+    await endExpiredSos(req.userId);
+
+    const [rows] = await db.query(
+      "SELECT id, share_token FROM sos_events WHERE user_id = ? AND status = 'active' ORDER BY id DESC LIMIT 1",
+      [req.userId]
+    );
+
+    if (rows.length === 0) {
+      return res.json({ active: false });
+    }
+
+    res.json({
+      active: true,
+      eventId: rows[0].id,
+      shareToken: rows[0].share_token
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 module.exports = router;

@@ -33,4 +33,9 @@ describe('Nirapod API', () => {
     const res = await request(app).post('/api/sos/start');
     expect(res.status).toBe(401);
   });
+  
+    test('sos active blocks requests without a token', async () => {
+    const res = await request(app).get('/api/sos/active');
+    expect(res.status).toBe(401);
+  });
 });

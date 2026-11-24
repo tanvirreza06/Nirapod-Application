@@ -1,0 +1,9 @@
+{
+  "appId": "com.nirapod.app",
+  "appName": "Nirapod",
+  "webDir": "dist",
+  "server": {
+    "url": "https://nirapod-application.vercel.app",
+    "androidScheme": "https"
+  }
+}
