@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { startTracking, stopTracking } from '../tracking'
 
 const SHAKE_LIMIT = 25
 const SHAKES_NEEDED = 3
@@ -25,34 +26,11 @@ function Sos() {
   useEffect(() => {
     if (!eventId) return
 
-    const token = localStorage.getItem('token')
-
-    function sendLocation() {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          try {
-            await fetch(`/api/sos/${eventId}/location`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-              },
-              body: JSON.stringify({
-                lat: pos.coords.latitude,
-                lng: pos.coords.longitude
-              })
-            })
-          } catch (err) {
-            setMessage('Cannot reach server')
-          }
-        },
-        () => setMessage('Please allow location access')
-      )
-    }
-
-    sendLocation()
-    const timer = setInterval(sendLocation, 5000)
-    return () => clearInterval(timer)
+    startTracking(eventId, (error) => {
+      if (error && error.code === 'NOT_AUTHORIZED') {
+        setMessage('Location permission is needed. Allow it in the phone settings.')
+      }
+    })
   }, [eventId])
 
   useEffect(() => {
@@ -98,7 +76,7 @@ function Sos() {
     return () => clearTimeout(t)
   }, [countdown])
 
-    useEffect(() => {
+  useEffect(() => {
     async function restoreActiveSos() {
       const token = localStorage.getItem('token')
 
@@ -120,7 +98,7 @@ function Sos() {
 
     restoreActiveSos()
   }, [])
-  
+
   async function enableShake() {
     if (typeof DeviceMotionEvent === 'undefined') {
       setMessage('This device has no motion sensor')
@@ -168,7 +146,7 @@ function Sos() {
       setCancelPin('')
       setCancelMessage('')
       setMessage('Alert cancelled')
-    } catch (err) {
+    } catch {
       setCancelMessage('Cannot reach server')
     }
   }
@@ -192,7 +170,7 @@ function Sos() {
       setEventId(data.eventId)
       setTrackLink(`${window.location.origin}/track/${data.shareToken}`)
       setMessage(data.message)
-    } catch (err) {
+    } catch {
       setMessage('Cannot reach server')
     }
   }
@@ -221,11 +199,12 @@ function Sos() {
         return
       }
 
+      await stopTracking()
       setEventId(null)
       setTrackLink('')
       setPin('')
       setMessage(data.message)
-    } catch (err) {
+    } catch {
       setMessage('Cannot reach server')
     }
   }
@@ -317,7 +296,8 @@ function Sos() {
       )}
 
       <p>{message}</p>
-            <a
+
+      <a
         href="tel:999"
         style={{
           display: 'inline-block',
