@@ -38,4 +38,9 @@ describe('Nirapod API', () => {
     const res = await request(app).get('/api/sos/active');
     expect(res.status).toBe(401);
   });
+
+    test('sos location blocks requests without a token', async () => {
+    const res = await request(app).post('/api/sos/1/location').send({ latitude: 1, longitude: 2 });
+    expect(res.status).toBe(401);
+  });
 });
